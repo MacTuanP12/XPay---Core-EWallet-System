@@ -1,9 +1,11 @@
 package com.xpay.core.modules.identity.service;
 
 import com.xpay.core.common.utils.JwtUtils;
+import com.xpay.core.exception.custom.ResourceNotFoundException;
 import com.xpay.core.modules.identity.dto.request.LoginRequest;
 import com.xpay.core.modules.identity.dto.request.RegisterRequest;
 import com.xpay.core.modules.identity.dto.response.AuthResponse;
+import com.xpay.core.modules.identity.dto.response.UserProfileResponse;
 import com.xpay.core.modules.identity.entity.KycStatus;
 import com.xpay.core.modules.identity.entity.Role;
 import com.xpay.core.modules.identity.entity.User;
@@ -16,12 +18,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.format.DateTimeFormatter;
 
 @Slf4j
 @Service
@@ -103,6 +107,25 @@ public class AuthServiceImpl implements AuthService {
                 .tokenType("Bearer")
                 .username(request.getUsername())
                 .role(role)
+                .build();
+    }
+
+    @Override
+    public UserProfileResponse getMyProfile() {
+        // 1. Lấy username từ JWT đã được xác thực trong SecurityContext
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        log.info("Lấy thông tin profile cho username: {}", username);
+
+        // 2. Tìm User trong DB, ném lỗi nếu không tìm thấy
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng: " + username));
+
+        // 3. Map Entity -> DTO, định dạng createdAt thành chuỗi dễ đọc
+        return UserProfileResponse.builder()
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .kycStatus(user.getKycStatus())
+                .createdAt(user.getCreatedAt().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")))
                 .build();
     }
 }
