@@ -23,7 +23,8 @@ public class CustomUserDetailsService implements UserDetailsService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy User: " + username));
 
-        // Chuyển đổi User thành UserDetails của Spring Security
+        // Role enum đã có prefix ROLE_ (ROLE_ADMIN, ROLE_USER)
+        // → dùng thẳng role.name() là đúng với Spring Security hasRole("ADMIN") / hasRole("USER")
         return new org.springframework.security.core.userdetails.User(
                 user.getUsername(),
                 user.getPassword(),

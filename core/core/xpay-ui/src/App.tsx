@@ -1,35 +1,52 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import './App.css';
+import { AuthProvider } from './context/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
+import AdminRoute from './components/AdminRoute';
+
+// User pages
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import DashboardPage from './pages/DashboardPage';
+import DepositPage from './pages/DepositPage';
+import TransferPage from './pages/TransferPage';
+import TransactionHistoryPage from './pages/TransactionHistoryPage';
+
+// Admin pages
+import AdminOverviewPage from './pages/admin/AdminOverviewPage';
+import AdminUsersPage from './pages/admin/AdminUsersPage';
+import AdminKycPage from './pages/admin/AdminKycPage';
+import AdminTransactionsPage from './pages/admin/AdminTransactionsPage';
 
 function App() {
-  const [count, setCount] = useState(0)
+    return (
+        <AuthProvider>
+            <BrowserRouter>
+                <Routes>
+                    {/* Public */}
+                    <Route path="/login"           element={<LoginPage />} />
+                    <Route path="/register"        element={<RegisterPage />} />
+                    <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+                    {/* User routes */}
+                    <Route path="/dashboard"    element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+                    <Route path="/deposit"      element={<ProtectedRoute><DepositPage /></ProtectedRoute>} />
+                    <Route path="/transfer"     element={<ProtectedRoute><TransferPage /></ProtectedRoute>} />
+                    <Route path="/transactions" element={<ProtectedRoute><TransactionHistoryPage /></ProtectedRoute>} />
+
+                    {/* Admin routes */}
+                    <Route path="/admin"              element={<AdminRoute><AdminOverviewPage /></AdminRoute>} />
+                    <Route path="/admin/users"        element={<AdminRoute><AdminUsersPage /></AdminRoute>} />
+                    <Route path="/admin/kyc"          element={<AdminRoute><AdminKycPage /></AdminRoute>} />
+                    <Route path="/admin/transactions" element={<AdminRoute><AdminTransactionsPage /></AdminRoute>} />
+
+                    {/* Fallback */}
+                    <Route path="*" element={<Navigate to="/login" replace />} />
+                </Routes>
+            </BrowserRouter>
+        </AuthProvider>
+    );
 }
 
-export default App
+export default App;

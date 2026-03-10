@@ -25,35 +25,49 @@ public class JwtUtils {
     private long jwtExpiration;
 
     public String generateToken(UserDetails userDetails) {
+        String role = userDetails.getAuthorities().stream()
+                .findFirst()
+                .map(a -> a.getAuthority())
+                .orElse("ROLE_USER");
+
         return Jwts.builder()
                 .subject(userDetails.getUsername())
+                .claim("role", role)                  // ← nhúng role vào JWT
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + jwtExpiration))
-                // Ký bằng con dấu bí mật.
                 .signWith(getSignInKey())
                 .compact();
     }
 
-    // Hàm tạo mã khóa an toàn (SecretKey) từ chuỗi text thô
+
     private SecretKey getSignInKey() {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
     }
-    // Hàm 1: Đọc tên khách hàng (username) từ trên Thẻ
+
     public String extractUsername(String token) {
         return Jwts.parser()
-                .verifyWith(getSignInKey()) // Đưa con dấu bí mật vào để đối chiếu chữ ký
+                .verifyWith(getSignInKey())
                 .build()
-                .parseSignedClaims(token) // Bóc tách Token
+                .parseSignedClaims(token)
                 .getPayload()
-                .getSubject(); // Lấy ra subject (chính là username ta nhét vào lúc trước)
+                .getSubject();
     }
 
-    // Hàm 2: Kiểm tra thẻ có hợp lệ không
+    public String extractRole(String token) {
+        return (String) Jwts.parser()
+                .verifyWith(getSignInKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .get("role");
+    }
+
+
     public boolean isTokenValid(String token) {
         try {
             Jwts.parser().verifyWith(getSignInKey()).build().parseSignedClaims(token);
-            return true; // Nếu parse thành công mà không nổ Exception -> Thẻ chuẩn
+            return true;
         } catch (Exception e) {
             log.error("Token không hợp lệ hoặc đã hết hạn: {}", e.getMessage());
             return false; // Thẻ giả hoặc đã hết hạn
