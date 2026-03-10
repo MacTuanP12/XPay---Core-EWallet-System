@@ -2,6 +2,10 @@ spring:
   application:
     name: XPay Core System
 
+  profiles:
+    active: local
+
+
 
   datasource:
     url: jdbc:mysql://localhost:3306/xpay_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
@@ -11,21 +15,20 @@ spring:
 
   jpa:
     hibernate:
-      # Dùng 'update' trong quá trình Dev để tự động tạo bảng từ Entity.
-      # Khi lên Production bắt buộc phải đổi thành 'validate' hoặc 'none'.
+
       ddl-auto: update
-    show-sql: true # Hiển thị câu lệnh SQL trên console để dễ debug
+    show-sql: true
     properties:
       hibernate:
-        format_sql: true # Format SQL cho dễ nhìn
+        format_sql: true
         dialect: org.hibernate.dialect.MySQLDialect
 
-# Cấu hình JWT Custom cho XPay
+
 application:
   security:
     jwt:
       secret-key: ${JWT_SECRET}
-      expiration: 86400000 # 1 ngày (tính bằng milliseconds)
+      expiration: 86400000
 
 server:
   port: 8080

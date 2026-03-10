@@ -1,9 +1,11 @@
-package com.xpay.core.modules.wallet.entity;
+package com.xpay.core.modules.transaction.entity;
 
 import com.xpay.core.common.entity.BaseEntity;
-import com.xpay.core.modules.transaction.entity.Wallet;
+import com.xpay.core.modules.wallet.entity.Wallet;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -26,6 +28,7 @@ public class Transaction extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     @Column(columnDefinition = "VARCHAR(36)", updatable = false, nullable = false)
     private UUID id;
 

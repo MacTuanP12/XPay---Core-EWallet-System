@@ -1,4 +1,4 @@
-package com.xpay.core.modules.transaction.entity;
+package com.xpay.core.modules.wallet.entity;
 
 public enum WalletStatus {
     ACTIVE, LOCKED, CLOSED

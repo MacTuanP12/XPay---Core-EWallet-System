@@ -1,4 +1,4 @@
-package com.xpay.core.modules.wallet.entity;
+package com.xpay.core.modules.transaction.entity;
 
 public enum TransactionType {
     DEPOSIT,  // Nạp tiền vào ví

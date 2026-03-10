@@ -96,3 +96,9 @@ Sổ cái (Ledger) ghi nhận mọi luồng di chuyển của dòng tiền. Bả
 | `reference_note` | `VARCHAR(255)`| `NULL` | Nội dung/Lời nhắn chuyển tiền. |
 | `created_at` | `DATETIME(6)` | `NOT NULL` | Thời điểm khởi tạo giao dịch. |
 | `updated_at` | `DATETIME(6)` | `NULL` | Thời điểm cập nhật trạng thái cuối cùng. |
+|             |                   |             |             |Spring Boot 4.0.3 — đã xác nhận từ pom.xml trước đó.
+Kèm theo các version liên quan:
+Spring Security: 7.0.3
+Hibernate: 7.2.4.Final
+Java: 21
+MySQL Connector: 9.6.0
