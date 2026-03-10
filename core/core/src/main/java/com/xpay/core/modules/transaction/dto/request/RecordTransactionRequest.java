@@ -1,5 +1,6 @@
 package com.xpay.core.modules.transaction.dto.request;
 
+import com.xpay.core.modules.transaction.entity.TransactionStatus;
 import com.xpay.core.modules.transaction.entity.TransactionType;
 import com.xpay.core.modules.wallet.entity.Wallet;
 import lombok.Builder;
@@ -15,10 +16,11 @@ import java.math.BigDecimal;
 @Builder
 public class RecordTransactionRequest {
 
-    private Wallet sourceWallet;       // null nếu là DEPOSIT
+    private Wallet sourceWallet;          // null nếu là DEPOSIT
     private Wallet destinationWallet;
     private BigDecimal amount;
     private TransactionType type;
+    private TransactionStatus status;     // WalletService quyết định SUCCESS/FAILED
     private String referenceNote;
 }
 

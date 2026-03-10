@@ -9,6 +9,7 @@ import com.xpay.core.modules.wallet.dto.request.DepositRequest;
 import com.xpay.core.modules.wallet.dto.request.TransferRequest;
 import com.xpay.core.modules.transaction.dto.request.RecordTransactionRequest;
 import com.xpay.core.modules.transaction.entity.Transaction;
+import com.xpay.core.modules.transaction.entity.TransactionStatus;
 import com.xpay.core.modules.transaction.entity.TransactionType;
 import com.xpay.core.modules.transaction.service.TransactionService;
 import com.xpay.core.modules.wallet.dto.response.TransferResponse;
@@ -67,10 +68,11 @@ public class WalletServiceImpl implements WalletService {
 
         // Uỷ quyền cho TransactionService ghi nhật ký — Wallet không cần biết cách lưu
         transactionService.record(RecordTransactionRequest.builder()
-                .sourceWallet(null) // null = tiền đến từ bên ngoài
+                .sourceWallet(null)
                 .destinationWallet(updatedWallet)
                 .amount(request.getAmount())
                 .type(TransactionType.DEPOSIT)
+                .status(TransactionStatus.SUCCESS)
                 .referenceNote(request.getReferenceNote())
                 .build());
 
@@ -133,6 +135,7 @@ public class WalletServiceImpl implements WalletService {
                 .destinationWallet(destinationWallet)
                 .amount(request.getAmount())
                 .type(TransactionType.TRANSFER)
+                .status(TransactionStatus.SUCCESS)
                 .referenceNote(request.getMessage())
                 .build());
 

@@ -46,7 +46,15 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
+                        // Public: chỉ Auth endpoints
                         .requestMatchers("/api/v1/auth/**").permitAll()
+                        // Public: Swagger UI / OpenAPI docs
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        // Protected: Wallet và Transaction bắt buộc phải có JWT
+                        .requestMatchers("/api/v1/wallets/**").authenticated()
+                        .requestMatchers("/api/v1/transactions/**").authenticated()
+                        .requestMatchers("/api/v1/users/**").authenticated()
+                        // Mọi request khác cũng phải xác thực
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
