@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { ArrowDownLeft, ArrowUpRight, ArrowLeftRight, RefreshCw, ChevronLeft, ChevronRight, Wallet } from 'lucide-react';
-import { transactionService } from '../api/services';
-import type { Transaction, PageResponse, DisplayType } from '../types';
+import { transactionService, walletService } from '../api/services';
+import type { Transaction, PageResponse, DisplayType, WalletResponse } from '../types';
 import AppLayout from '../components/AppLayout';
 import { clsx } from 'clsx';
 
@@ -29,13 +29,18 @@ const PAGE_SIZE = 10;
 export default function TransactionHistoryPage() {
     const [page,    setPage]    = useState(0);
     const [data,    setData]    = useState<PageResponse<Transaction> | null>(null);
+    const [wallet,  setWallet]  = useState<WalletResponse | null>(null);
     const [loading, setLoading] = useState(true);
 
     const fetchPage = useCallback(async (p: number) => {
         setLoading(true);
         try {
-            const res = await transactionService.getHistory(p, PAGE_SIZE);
+            const [res, w] = await Promise.all([
+                transactionService.getHistory(p, PAGE_SIZE),
+                walletService.getMyWallet(),
+            ]);
             setData(res.data.data);
+            setWallet(w.data.data);
             setPage(p);
         } catch { /* interceptor */ }
         finally { setLoading(false); }
@@ -57,11 +62,21 @@ export default function TransactionHistoryPage() {
                             {data ? `Tổng ${data.totalElements} giao dịch` : 'Đang tải...'}
                         </p>
                     </div>
-                    <button onClick={() => fetchPage(page)}
-                        className="flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 text-sm text-gray-600 hover:bg-gray-100 transition-all">
-                        <RefreshCw className={clsx('w-4 h-4', loading && 'animate-spin')} />
-                        Làm mới
-                    </button>
+                    <div className="flex items-center gap-3">
+                        {/* Current balance badge */}
+                        {wallet && (
+                            <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-50 border border-blue-200 text-sm text-blue-700 font-medium">
+                                <Wallet className="w-4 h-4 text-blue-500" />
+                                <span>Số dư hiện tại:</span>
+                                <span className="font-bold">{wallet.balance}</span>
+                            </div>
+                        )}
+                        <button onClick={() => fetchPage(page)}
+                            className="flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 text-sm text-gray-600 hover:bg-gray-100 transition-all">
+                            <RefreshCw className={clsx('w-4 h-4', loading && 'animate-spin')} />
+                            Làm mới
+                        </button>
+                    </div>
                 </div>
 
                 {/* Legend */}
@@ -96,7 +111,6 @@ export default function TransactionHistoryPage() {
                                     <th className="px-6 py-3.5 text-left">Thời gian</th>
                                     <th className="px-6 py-3.5 text-center">Trạng thái</th>
                                     <th className="px-6 py-3.5 text-right">Số tiền</th>
-                                    <th className="px-6 py-3.5 text-right">Số dư sau GD</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-50">
@@ -141,14 +155,6 @@ export default function TransactionHistoryPage() {
                                             {/* Số tiền có dấu +/- */}
                                             <td className={clsx('px-6 py-4 text-right font-bold text-base', cfg.amountCls)}>
                                                 {tx.amountSigned ?? (dt === 'TRANSFER' ? '−' : '+') + tx.amount}
-                                            </td>
-
-                                            {/* Số dư sau giao dịch */}
-                                            <td className="px-6 py-4 text-right">
-                                                <div className="flex items-center justify-end gap-1.5 text-gray-600">
-                                                    <Wallet className="w-3.5 h-3.5 text-gray-400" />
-                                                    <span className="text-sm font-medium">{tx.balanceAfter ?? '—'}</span>
-                                                </div>
                                             </td>
                                         </tr>
                                     );
