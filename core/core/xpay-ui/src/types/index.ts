@@ -112,16 +112,20 @@ export interface AdminTransaction {
     createdAt: string;
 }
 
-export type TransactionType   = 'DEPOSIT' | 'TRANSFER' | 'WITHDRAW';
-export type TransactionStatus = 'SUCCESS' | 'FAILED'  | 'PENDING';
+export type TransactionType    = 'DEPOSIT' | 'TRANSFER' | 'WITHDRAW';
+export type TransactionStatus  = 'SUCCESS' | 'FAILED'  | 'PENDING';
+export type DisplayType        = 'DEPOSIT' | 'RECEIVED' | 'TRANSFER';
 
 export interface Transaction {
     transactionId: string;
     type: TransactionType;
+    displayType: DisplayType;       // DEPOSIT=nạp | RECEIVED=nhận | TRANSFER=chuyển đi
     status: TransactionStatus;
-    amount: string;           // already formatted
-    counterpart: string;
+    amount: string;                 // "500.000 VND"
+    amountSigned: string;           // "+500.000 VND" hoặc "−500.000 VND"
+    balanceAfter: string;           // Số dư sau giao dịch (tham khảo)
+    counterpart: string;            // username đối tác
     referenceNote: string;
-    createdAt: string;        // "dd/MM/yyyy HH:mm:ss"
+    createdAt: string;
 }
 

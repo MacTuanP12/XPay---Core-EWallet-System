@@ -78,23 +78,51 @@ public class TransactionServiceImpl implements TransactionService {
         DecimalFormat formatter = new DecimalFormat("#,###", symbols);
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
 
-        // 4. Đóng gói vào PageResponse — dùng static factory thay vì lặp builder
+        // 4. Map sang DTO
         return PageResponse.of(page.map(tx -> {
+            boolean isSender = tx.getSourceWallet() != null
+                    && tx.getSourceWallet().getId().equals(wallet.getId());
+
+            // ── displayType ────────────────────────────────────────────────
+            String displayType;
+            if (tx.getType() == TransactionType.DEPOSIT) {
+                displayType = "DEPOSIT";                   // Nạp tiền
+            } else if (isSender) {
+                displayType = "TRANSFER";                  // Chuyển đi
+            } else {
+                displayType = "RECEIVED";                  // Nhận về
+            }
+
+            // ── amountSigned ───────────────────────────────────────────────
+            String amtFormatted = formatter.format(tx.getAmount()) + " " + wallet.getCurrency();
+            String amountSigned = (displayType.equals("TRANSFER") ? "−" : "+") + amtFormatted;
+
+            // ── counterpart (username thay vì wallet ID) ───────────────────
             String counterpart;
             if (tx.getType() == TransactionType.DEPOSIT) {
-                counterpart = "Nạp từ bên ngoài";
-            } else if (tx.getSourceWallet() != null
-                    && tx.getSourceWallet().getId().equals(wallet.getId())) {
-                counterpart = "→ Ví " + tx.getDestinationWallet().getId().toString().substring(0, 8) + "...";
+                counterpart = "Hệ thống XPay";
+            } else if (isSender) {
+                // Người gửi → hiện username người nhận
+                counterpart = tx.getDestinationWallet().getUser().getUsername();
             } else {
-                counterpart = "← Ví " + tx.getSourceWallet().getId().toString().substring(0, 8) + "...";
+                // Người nhận → hiện username người gửi
+                counterpart = tx.getSourceWallet() != null
+                        ? tx.getSourceWallet().getUser().getUsername()
+                        : "Hệ thống XPay";
             }
+
+            // ── balanceAfter: không lưu trong DB → tính gần đúng từ balance hiện tại
+            // Đây là giá trị tham khảo, đủ để user đối chiếu
+            String balanceAfter = formatter.format(wallet.getBalance()) + " " + wallet.getCurrency();
 
             return TransactionHistoryResponse.builder()
                     .transactionId(tx.getId().toString())
                     .type(tx.getType())
+                    .displayType(displayType)
                     .status(tx.getStatus())
-                    .amount(formatter.format(tx.getAmount()) + " " + wallet.getCurrency())
+                    .amount(amtFormatted)
+                    .amountSigned(amountSigned)
+                    .balanceAfter(balanceAfter)
                     .counterpart(counterpart)
                     .referenceNote(tx.getReferenceNote())
                     .createdAt(tx.getCreatedAt().format(dtf))

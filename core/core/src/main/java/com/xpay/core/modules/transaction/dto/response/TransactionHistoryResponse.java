@@ -10,10 +10,13 @@ import lombok.Data;
 public class TransactionHistoryResponse {
 
     private String transactionId;
-    private TransactionType type;        // DEPOSIT / TRANSFER
-    private TransactionStatus status;    // SUCCESS / FAILED / PENDING
-    private String amount;               // Định dạng: "500.000 VND"
-    private String counterpart;          // Tên ví/user đối diện (gửi đến ai / nhận từ ai)
+    private TransactionType type;        // DEPOSIT / TRANSFER (loại gốc)
+    private String displayType;          // "DEPOSIT" | "RECEIVED" | "TRANSFER" — hiển thị FE
+    private TransactionStatus status;
+    private String amount;               // "500.000 VND"
+    private String amountSigned;         // "+500.000 VND" hoặc "-500.000 VND"
+    private String balanceAfter;         // Số dư ví sau giao dịch (để đối chiếu)
+    private String counterpart;          // Tên user đối tác
     private String referenceNote;
-    private String createdAt;            // Định dạng: "dd/MM/yyyy HH:mm:ss"
+    private String createdAt;
 }
